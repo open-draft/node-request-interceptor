@@ -3,6 +3,7 @@ import { Url as LegacyURL } from 'url'
 import { HttpRequestCallback, RequestSelf } from '../../../glossary'
 import { getRequestOptionsByUrl } from '../../../utils/getRequestOptionsByUrl'
 import { getUrlByRequestOptions } from '../../../utils/getUrlByRequestOptions'
+import { cloneObject } from '../../../utils/cloneObject'
 import { isObject } from '../../../utils/isObject'
 
 const debug = require('debug')('http normalizeHttpRequestParams')
@@ -22,7 +23,12 @@ function resolveRequestOptions(
     return getRequestOptionsByUrl(url)
   }
 
-  return args[1] as RequestOptions
+  /**
+   * Clone the request options to lock their state
+   * at the moment they are provided to `ClientRequest.
+   * @see https://github.com/mswjs/node-request-interceptor/issues/86
+   */
+  return args[1] ? cloneObject(args[1]) : ({} as RequestOptions)
 }
 
 function resolveCallback(
